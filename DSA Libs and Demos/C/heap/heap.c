@@ -2,15 +2,21 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include "heap.h"
 
 #define MAXIMUM_HEAP_SIZE     10000000   // 10 million
 #define MAXIMUM_HEAP_HEIGHT   24         // ⌈ log2(10,000,000) ⌉
 
-static void * Heap = NULL;
-static size_t HeapSize;
-static int (* CompareElements)(const void * a, const void * b);
-static size_t SizeOfMember;
-static bool HeapInitialized;
+struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b), size_t size_of_member )
+{
+   struct Heap_S * HeapInstance = (struct Heap_S *)malloc( sizeof(struct Heap_S) );
+   HeapInstance->cmp_fcn = cmp;
+   HeapInstance->heap = NULL;
+   HeapInstance->size_of_member = size_of_member;
+   HeapInstance->num_of_members = 0;
+}
+
+/*
 
 bool HeapifyArray( const void * array, size_t length, size_t size_of_member, int (* comp)(const void * a, const void * b) )
 {
@@ -110,3 +116,5 @@ bool InsertIntoHeap( const void * element )
 
    return true;
 }
+
+*/
