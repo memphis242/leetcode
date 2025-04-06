@@ -19,7 +19,9 @@ int TestCmp( const void * a, const void * b );
 
 int main(void)
 {
-   HeapInit( TestCmp, sizeof(struct KeyValuePair_S) );
+   struct Heap_S * heap = NULL;
+   heap = HeapInit( TestCmp, sizeof(struct KeyValuePair_S) );
+   printf("Address of heap: %p\n", (void *)heap);
 }
 
 int TestCmp( const void * a, const void * b )

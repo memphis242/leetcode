@@ -14,6 +14,8 @@ struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b), size_t si
    HeapInstance->heap = NULL;
    HeapInstance->size_of_member = size_of_member;
    HeapInstance->num_of_members = 0;
+
+   return HeapInstance;
 }
 
 /*
