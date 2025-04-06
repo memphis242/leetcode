@@ -55,7 +55,7 @@ $(SOURCE_FILE).o: $(SOURCE_FILE).c
 	@echo "----------------------------------------"
 	@echo "Running static analysis on $<..."
 	@echo
-	cppcheck $<
+	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | python ../../../colorize_cppcheck.py
 
 # Clean rule to remove generated files
 .PHONY: clean

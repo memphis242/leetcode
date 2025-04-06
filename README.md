@@ -15,4 +15,5 @@ The build will do the following:
 Tools Used:
 - gcc
 - cppcheck
+- python for colorizing cppcheck's output using [`colorize_cppcheck.py`](./colorize_cppcheck.py)
 - objdump
