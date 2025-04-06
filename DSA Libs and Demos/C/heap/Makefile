@@ -1,4 +1,5 @@
 # Upstream Common.mk simply needs the name used by the source file, without the extension
-SOURCE_FILE = heap
+DSA_SOURCE_NAME = heap
+TEST_FILE_NAME = test_$(DSA_SOURCE_NAME)
 
-include ../../../Common.mk
+include ../CommonDSA.mk
