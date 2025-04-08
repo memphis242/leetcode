@@ -2,96 +2,86 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "heap.h"
 
-#define MAXIMUM_HEAP_SIZE     10000000   // 10 million
-#define MAXIMUM_HEAP_HEIGHT   24         // ⌈ log2(10,000,000) ⌉
+#define MAX_NUM_OF_HEAP_NODES    10000000u   // 10 million
+#define MAX_HEAP_HEIGHT          24u         // ⌈ log2(10,000,000) ⌉
 
-struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b), size_t size_of_member )
+struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b), size_t element_size )
 {
    struct Heap_S * HeapInstance = (struct Heap_S *)malloc( sizeof(struct Heap_S) );
    HeapInstance->cmp_fcn = cmp;
    HeapInstance->heap = NULL;
-   HeapInstance->size_of_member = size_of_member;
-   HeapInstance->num_of_members = 0;
+   HeapInstance->element_size = element_size;
+   HeapInstance->len = 0;
 
    return HeapInstance;
 }
 
-/*
+// struct Heap_S * Heapify( const void * arr, uint32_t num_of_elms, size_t element_size,
+//                          int (* cmp)(const void * a, const void * b) )
+// {
+//    // Early return opportunities
+//    if ( (NULL == arr) || (0 == num_of_elms) || (0 == element_size) ||
+//         (num_of_elms > MAX_NUM_OF_HEAP_NODES) || (NULL == cmp) )
+//    {
+//       // Invalid arguments passed in!
+//       return NULL;
+//    }
+// 
+//    struct Heap_S * HeapInstance = (struct Heap_S *)malloc( element_size );
+//    if ( NULL == HeapInstance )
+//    {
+//       // Failed to dynamically allocate memory!
+//       return NULL;
+//    }
+// 
+//    HeapInstance->cmp_fcn = cmp;
+//    HeapInstance->element_size = element_size;
+//    uint8_t * ptr = arr;
+//    for ( uint32_t i = 0; i < num_of_elms; i++ )
+//    {
+//       HeapInsert( HeapInstance->heap, ptr );
+//       ptr += element_size;
+//    }
+// 
+//    return HeapInstance;
+// }
 
-bool HeapifyArray( const void * array, size_t length, size_t size_of_member, int (* comp)(const void * a, const void * b) )
+bool InsertIntoHeap( struct Heap_S * self, const void * element )
 {
-   // Early return opportunities
-   if ( (NULL == array) || (0 == length) || (0 == size_of_member) || (size_of_member > MAXIMUM_HEAP_SIZE) || (NULL == comp) )
+   // Early return opportunity
+   if ( (NULL == element) || (NULL == self) )
    {
-      // Invalid arguments passed in!
       return false;
    }
-   else if ( length == 1 )
-   {
-      Heap = malloc( size_of_member );
-      if ( NULL == Heap )
-      {
-         // Failed to dynamically allocate memory!
-         return false;
-      }
 
-      (void)memcpy(Heap, array, size_of_member);
-      HeapSize = 1;
-      CompareElements = comp;
-      SizeOfMember = size_of_member;
-      HeapInitialized = true;
+   else if ( (0 == self->len) || (NULL == self->heap) )
+   {
+      // Heap has no elements yet, so ez-pz insertion!
+      (void)memcpy( self->heap, element, self->element_size );
+      self->len = 1;
 
       return true;
    }
-   
-   // Loop through elements in the array, inserting into the heap one-at-a-time and
-   // swapping as needed to maintain the necessary heap properties.
-   Heap = malloc( length * size_of_member );
-   if ( NULL == Heap )
-   {
-      // Failed to dynamically allocate memory!
-      return false;
-   }
-   CompareElements = comp;
-   SizeOfMember = size_of_member;
-   HeapInitialized = true;
 
-   char * ptr = (char *)array;
-   for ( size_t i = 0; i < length; i++, HeapSize++ )
-   {
-      InsertIntoHeap( (const void *)ptr, size_of_member );
-      ptr += i * size_of_member;
-   }
-
-
-   return true;
-}
-
-bool InsertIntoHeap( const void * element )
-{
-   // Early return opportunity
-   if ( (NULL == element) || (HeapInitialized != true) )
-   {
-      return false;
-   }
-
-   char * ptr_to_heap_root = (char *)Heap;
-   // Insert to the bottom layer's left-most open spot (indexed wonderfully by HeapSize)
-   char * ptr_to_new_member_slot = ptr_to_heap_root + (HeapSize * SizeOfMember);
-   (void)memcpy( ptr_to_new_member_slot, element, SizeOfMember );
+   // Insert to the bottom layer's left-most open spot.
+   // For array implementations, this is simply arr[self->len]!
+   uint8_t * ptr_root = (uint8_t *)self->heap;
+   uint8_t * ptr_new_mem = ptr_root + (self->len * self->element_size);
+   (void)memcpy( ptr_new_mem, element, self->element_size );
 
    // Check against parent and perform necessary bubble-up swaps until the necessary heap property is satisfied
    size_t present_idx = HeapSize;
    size_t parent_idx = (present_idx - 1) / 2;
    size_t idx_diff = present_idx - parent_idx;
-   char * ptr_to_inserted_element = ptr_to_new_member_slot;
-   char * ptr_to_parent = ptr_to_inserted_element - (idx_diff * SizeOfMember);
+   uint8_t * ptr_to_inserted_element = ptr_new_mem;
+   uint8_t * ptr_to_parent = ptr_to_inserted_element - (idx_diff * SizeOfMember);
    unsigned long long int counter = 0;
    void * temp = malloc(SizeOfMember);
    // Until newly inserted element's position respects the heap property...
-   while ( (present_idx != 0) && (CompareElements( element, ptr_to_parent ) > 0) && (counter < MAXIMUM_HEAP_HEIGHT) )
+   while ( (present_idx != 0) && (CompareElements( element, ptr_to_parent ) > 0) && (counter < MAX_HEAP_HEIGHT) )
    {
       // Swap
       if ( NULL == temp )
@@ -118,5 +108,3 @@ bool InsertIntoHeap( const void * element )
 
    return true;
 }
-
-*/

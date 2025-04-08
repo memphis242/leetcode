@@ -5,9 +5,8 @@ struct Heap_S
 {
    void * heap;
    int (* cmp_fcn)(const void * a, const void * b);
-   size_t size_of_member;
-   size_t num_of_members;
-   bool heap_initialized;
+   size_t element_size;
+   size_t len;
 };
 
 struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b), size_t size_of_member );
