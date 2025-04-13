@@ -39,7 +39,7 @@ struct Vector_S * VectorInit( size_t element_size, uint32_t initial_length );
  *
  * Releases all resources associated with the vector, including its internal data.
  *
- * @param self A pointer to the vector to be freed.
+ * @param self Vector handleto be freed.
  */
 void VectorFree( struct Vector_S * self );
 
@@ -48,7 +48,7 @@ void VectorFree( struct Vector_S * self );
  *
  * Adds a new element to the end of the vector, resizing the vector if necessary.
  *
- * @param self A pointer to the vector.
+ * @param self Vector handle
  * @param element A pointer to the element to be inserted.
  *                The memory pointed to must not overlap with the vector's memory.
  *
@@ -57,26 +57,75 @@ void VectorFree( struct Vector_S * self );
 bool VectorInsert( struct Vector_S * self, const void * restrict element );
 
 /**
+ * @brief Retrieves the element at the specified index in the vector.
+ *
+ * Provides access to the element at the given index _without_ removing it.
+ *
+ * @param self Vector handle
+ * @param idx The index of the element to retrieve.
+ * 
+ * @return A pointer to the element at the specified index, or NULL if the index
+ *         is out of bounds.
+ */
+void * VectorGetElementAt( struct Vector_S * self, uint32_t idx );
+
+/**
+ * @brief Sets the value of an element at the specified index in the vector.
+ *
+ * Updates the element at the given index with the provided value.
+ *
+ * @param self Vector handle
+ * @param idx The index of the element to update.
+ * @param element A pointer to the new value to set at the specified index.
+ *                The memory pointed to must not overlap with the vector's memory.
+ * 
+ * @return A pointer to the updated element, or NULL if the index is out of bounds.
+ */
+void * VectorSetElementAt( struct Vector_S * self,
+                           uint32_t idx,
+                           const void * restrict element );
+
+/**
  * @brief Removes an element from the vector at the specified index.
  *
  * Deletes the element at the given index and shifts subsequent elements to fill
  * the gap.
  *
- * @param self A pointer to the vector.
+ * @param self Vector handle
  * @param idx The index of the element to be removed.
  * 
  * @return A pointer to the removed element, or NULL if the index is out of bounds.
  */
-void * VectorRemove( struct Vector_S * self, uint32_t idx );
+void * VectorRemoveElementAt( struct Vector_S * self, uint32_t idx );
 
-void * VectorElementAt( struct Vector_S * self, uint32_t idx );
-
-void * VectorSetElementAt( struct Vector_S * self,
-                           uint32_t idx,
-                           const void * restrict element );
-
+/**
+ * @brief Retrieves the number of elements in the vector.
+ *
+ * Returns the current number of elements stored in the vector.
+ *
+ * @param self Vector handle
+ * 
+ * @return The number of elements in the vector.
+ */
 uint32_t VectorLength( struct Vector_S * self );
 
+/**
+ * @brief Retrieves the last element in the vector.
+ *
+ * Provides access to the last element in the vector without removing it.
+ *
+ * @param self Vector handle
+ * 
+ * @return A pointer to the last element, or NULL if the vector is empty.
+ */
 void * VectorLastElement( struct Vector_S * self );
 
+/**
+ * @brief Clears all elements in the vector.
+ *
+ * Removes all elements from the vector, resetting its length to zero.
+ * The allocated memory is not freed, allowing the vector to be reused.
+ *
+ * @param self Vector handle
+ */
 void VectorClear( struct Vector_S * self );
