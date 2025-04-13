@@ -1,3 +1,12 @@
+/**
+ * @file heap.c
+ * @brief Implementation of a binary heap in C.
+ *
+ * @author Abdulla Almosalami (@memphis242)
+ * @date April 13, 2025
+ * @copyright MIT License
+ */
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdlib.h>
