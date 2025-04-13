@@ -32,13 +32,30 @@ struct Heap_S
 struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b),
                           size_t element_size )
 {
+   // Early return for invalid arguments
+   if ( (NULL == cmp) || (element_size == 0) )
+   {
+      // TODO: Throw exception
+      return NULL;
+   }
+
    struct Heap_S * HeapInstance = (struct Heap_S *)malloc( sizeof(struct Heap_S) );
    HeapInstance->cmp_fcn = cmp;
-   HeapInstance->heap = NULL;
    HeapInstance->element_size = element_size;
+   HeapInstance->heap = malloc(element_size);
    HeapInstance->len = 0;
 
    return HeapInstance;
+}
+
+// Destructor
+void HeapFree( struct Heap_S * self )
+{
+   // TODO: Detect a call to this from a pointer that was not previously allocated?
+   //       The C standard says this is undefined behavior.
+   //       NOTE: It is also undefined behavior to call free on a pointer that
+   //             has already been free'd / realloc'd.
+   free(self);
 }
 
 // struct Heap_S * Heapify( const void * arr, uint32_t num_of_elms, size_t element_size,
@@ -71,11 +88,13 @@ struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b),
 //    return HeapInstance;
 // }
 
+// Methods
 bool InsertIntoHeap( struct Heap_S * self, const void * element )
 {
    // Early return opportunity
    if ( (NULL == element) || (NULL == self) )
    {
+      // TODO: Throw exception
       return false;
    }
 
@@ -88,14 +107,17 @@ bool InsertIntoHeap( struct Heap_S * self, const void * element )
       return true;
    }
 
-   // Insert to the bottom layer's left-most open spot.
-   // For array implementations, this is simply arr[self->len]!
+   // Insert into the bottom layer's left-most open spot.
+   // For an array implementations, this is simply arr[self->len]!
    uint8_t * ptr_root = (uint8_t *)self->heap;
    uint8_t * ptr_new_mem = ptr_root + (self->len * self->element_size);
    (void)memcpy( ptr_new_mem, element, self->element_size );
+   self->len++;
+
+   // Call the private function to bubble up the 
 
    // Check against parent and perform necessary bubble-up swaps until the necessary heap property is satisfied
-   size_t present_idx = HeapSize;
+   size_t present_idx = self->len;
    size_t parent_idx = (present_idx - 1) / 2;
    size_t idx_diff = present_idx - parent_idx;
    uint8_t * ptr_to_inserted_element = ptr_new_mem;
