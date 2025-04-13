@@ -14,10 +14,23 @@
 #include <stdint.h>
 #include "heap.h"
 
-#define MAX_NUM_OF_HEAP_NODES    10000000u   // 10 million
-#define MAX_HEAP_HEIGHT          24u         // ⌈ log2(10,000,000) ⌉
+#define MAX_NUM_OF_HEAP_NODES    1000000u   // 1 million
+#define MAX_HEAP_HEIGHT          24u        // ⌈ log2(10,000,000) ⌉
+#define LEFT_CHILD(idx)          ( 2*(idx) + 1 )
+#define RIGHT_CHILD(idx)         ( 2*(idx) + 2 )
+#define PARENT(idx)              ( ((idx) - 1) / 2 )
 
-struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b), size_t element_size )
+struct Heap_S
+{
+   void * heap;
+   int (* cmp_fcn)(const void * a, const void * b);
+   size_t element_size;
+   uint32_t len;
+};
+
+// Constructor
+struct Heap_S * HeapInit( int (* cmp)(const void * a, const void * b),
+                          size_t element_size )
 {
    struct Heap_S * HeapInstance = (struct Heap_S *)malloc( sizeof(struct Heap_S) );
    HeapInstance->cmp_fcn = cmp;
