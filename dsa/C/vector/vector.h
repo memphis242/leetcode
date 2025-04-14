@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 // TODO: Exceptions
+// TODO: Support custom allocators passed in
 
 /* Public Macro Definitions */
 
@@ -28,33 +29,46 @@ struct Vector_S;
  * Allocates memory for a dynamic array (vector) and initializes its properties.
  *
  * @param element_size The size of each element in the vector (in bytes).
- * @param initial_length The initial number of elements the vector can hold.
+ * @param initial_capacity The initial number of elements the vector can hold.
  *
  * @return A pointer to the initialized vector, or NULL if allocation fails.
  */
-struct Vector_S * VectorInit( size_t element_size, uint32_t initial_length );
+struct Vector_S * VectorInit( size_t element_size, uint32_t initial_capacity );
 
 /**
  * @brief Frees the memory allocated for the vector.
  *
  * Releases all resources associated with the vector, including its internal data.
  *
- * @param self Vector handleto be freed.
+ * @param self Vector handle
  */
 void VectorFree( struct Vector_S * self );
 
 /**
- * @brief Inserts an element into the vector.
- *
- * Adds a new element to the end of the vector, resizing the vector if necessary.
+ * @brief Inserts an element at the _end_ of the vector.
  *
  * @param self Vector handle
  * @param element A pointer to the element to be inserted.
- *                The memory pointed to must not overlap with the vector's memory.
  *
  * @return `true` if the insertion is successful, `false` otherwise.
+ *         (e.g., memory allocation fails).
  */
-bool VectorInsert( struct Vector_S * self, const void * restrict element );
+bool VectorPush( struct Vector_S * self, const void * restrict element );
+
+/**
+ * @brief Inserts an element into the vector at the specified index.
+ * 
+ * This function inserts the given element into the vector at the specified
+ * index, shifting all subsequent elements one position to the right.
+ *  
+ * @param self Vector handle
+ * @param idx The index at which the element should be inserted.
+ * @param element Pointer to the element to be inserted.
+ * 
+ * @return true if the element was successfully inserted, false otherwise
+ *         (e.g., memory allocation fails).
+ */
+bool VectorInsertAt( struct Vector_S * self, uint32_t idx, const void * restrict element );
 
 /**
  * @brief Retrieves the element at the specified index in the vector.
@@ -129,3 +143,12 @@ void * VectorLastElement( struct Vector_S * self );
  * @param self Vector handle
  */
 void VectorClear( struct Vector_S * self );
+
+/**
+ * @brief Checks if the vector is empty.
+ * 
+ * @param self A pointer to the Vector_S structure representing the vector.
+ * 
+ * @return true is empty, false otherwise.
+ */
+bool VectorIsEmpty( struct Vector_S * self );
