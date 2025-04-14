@@ -69,6 +69,11 @@ struct Vector_S * VectorInit( size_t element_size, uint32_t initial_capacity )
    }
 
    struct Vector_S * NewVec = (struct Vector_S *)malloc( sizeof(struct Vector_S) );
+   if ( NULL == NewVec )
+   {
+      return NULL;
+   }
+
    if ( 0 == initial_capacity )
    {
       NewVec->arr = NULL;
@@ -77,17 +82,20 @@ struct Vector_S * VectorInit( size_t element_size, uint32_t initial_capacity )
    {
       NewVec->arr = malloc( (size_t)(element_size * initial_capacity) );
    }
+
    // If malloc failed to allocate space for the array...
    if ( (initial_capacity > 0) && (NULL == NewVec->arr) )
    {
       // TODO: Throw exception to inform user...
-      NewVec->len = 0;
+      NewVec->capacity = 0;
    }
    else
    {
-      NewVec->len = initial_capacity;
+      NewVec->capacity = initial_capacity;
    }
+
    NewVec->element_size = element_size;
+   NewVec->len = 0;
 
    return NewVec;
 }
