@@ -21,10 +21,15 @@
 
 // Enforce a maximum length to help prevent extreme memory requests
 #define TENTATIVE_MAX_VEC_LEN 100000 // 100,000
-#if(SIZE_MAX < TENTATIVE_MAX_VEC_LEN)
+#if ( SIZE_MAX < PTRDIFF_MAX )
+   #define SYSTEM_LIMIT SIZE_MAX
+#else
+   #define SYSTEM_LIMIT PTRDIFF_MAX
+#endif
+#if (SYSTEM_LIMIT < TENTATIVE_MAX_VEC_LEN)
    #define MAX_VECTOR_LENGTH  SIZE_MAX
 #else
-   #define MAX_VECTOR_LENGTH  TENTATIVE_MAX_VEC_LEN
+   #define MAX_VECTOR_LENGTH TENTATIVE_MAX_VEC_LEN
 #endif
 
 /* Local Datatypes */
