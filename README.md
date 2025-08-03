@@ -1,2 +1,5 @@
 # My LeetCode Solutions Notebook :green_book:
 Tracking my LeetCode solutions here. I'll start off by using C, C++, and Python. If I'm feeling special, I'll give bash a go. As I add more programming languages to my toolkit (looking at you JS, Rust, Haskell, and Go), I'll add solutions for those here. The goal is to use LeetCode as a sharpening tool for my DS&A skills in each of those languages, and my general algorithmic thinking. I also do know MATLAB reasonably well, but that's a work-only/school-only kind of language.
+
+## Disclaimer!
+The code that I put out for the direct solution to a Leetcode problem is very likely **NOT** how I would normally code in that language, including style-wise. It is quick and dirty and tricky, as is necessary to attain the speed and accuracy asked of me from such coding challenge problems. However, each solution folder is going to be accompanied by a document of me explaining how I _would_ redo the function interface (or other relevant detail) to utilize best practices of that respective language (e.g., taking advantage of NRVO in C++ and avoiding `new` usage).
