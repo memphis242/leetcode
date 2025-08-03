@@ -3,6 +3,7 @@
 *.lst
 *.log
 *.a
+*.swp
 
 # Certain source files I don't want committed
 leetcode.c
