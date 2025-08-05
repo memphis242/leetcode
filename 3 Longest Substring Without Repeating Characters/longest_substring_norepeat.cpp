@@ -8,17 +8,17 @@ using namespace std;
 class Solution {
 public:
     int lengthOfLongestSubstring(string s) {
-        if ( s.empty() )
-            return 0;
+        if ( s.length() <= 1 )
+            return s.length();
 
-        priority_queue<int> len_heap;
+        size_t max_len = 0;
         list<unordered_set<char>> substr_list;
 
         for ( char c : s ) {
             for ( auto it = substr_list.begin(); it != substr_list.end(); ) {
-                auto [iter, inserted] = it->insert(c);
+                auto [_, inserted] = it->insert(c);
                 if ( !inserted ) {
-                    len_heap.push(it->size());
+                    max_len = (it->size() > max_len) ? it->size() : max_len;
                     it = substr_list.erase(it);
                 }
                 else {
@@ -27,7 +27,9 @@ public:
             }
             substr_list.emplace_back(unordered_set<char>{c});
         }
+        size_t longest_remaining_len = substr_list.front().size();
+        max_len = (longest_remaining_len > max_len) ? longest_remaining_len : max_len;
 
-        return len_heap.top();
+        return static_cast<int>(max_len);
     }
 };
