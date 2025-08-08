@@ -63,5 +63,23 @@ public:
         // Repeat, until your divisions are lengths
         // of 2 or 1. Then, pick the block of 2. One of these numbers is the median...
         // Still gotta figure out the pattern at that point.
+        //
+        // Working Idea Day 2:
+        // Improvement on the working idea of the previous day. Instead of choosing
+        // between the middle two on each 4-split step, we combine the middle two
+        // and work with the knoweldge that the median _must_ lie in that middle-merge.
+        // We then repeat _on that_ middle-merge.
+        //
+        // I did also look at portions of the LeetCode Editorial solution (which
+        // was a confusing, inconsistent read to be frank). The ideas of one (or more?
+        // unclear, tbh) of the solutions are as follows:
+        // - Suppose array A is the array with a median ≤ than the other array's.
+        // - That essentially leads to the fact that the left half of array A
+        //   is ≤ than the right half of array B.
+        // - We take advantage of that by eliminating one of these halves given
+        //   the knowledge that the median will certainly be ≥ or ≤ one of these
+        //   halves.
+        // - One of the ways we can do this is know that the median will be at
+        //   the kth index of the merged array, and eliminate iteratively according.nn
     }
 };
