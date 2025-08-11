@@ -1,13 +1,13 @@
 #include <cassert>
 
-//struct ListNode {
-//   int val;
-//   ListNode *next;
-//
-//   ListNode() : val(0), next(nullptr) {}
-//   ListNode(int x) : val(x), next(nullptr) {}
-//   ListNode(int x, ListNode *next) : val(x), next(next) {}
-//};
+struct ListNode {
+   int val;
+   ListNode *next;
+
+   ListNode() : val(0), next(nullptr) {}
+   ListNode(int x) : val(x), next(nullptr) {}
+   ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
 
 /**
  * Definition for singly-linked list.
@@ -105,16 +105,13 @@ public:
       assert(l);
 
       if ( !l->next )
-         return l;
+         return new ListNode(l->val);
 
-      ListNode* curr = new ListNode(l->val);
       ListNode* prev = nullptr;
-      ListNode* next;
       while ( l ) {
-         next = (curr->next) ? new ListNode(l->next->val) : nullptr;
+         ListNode* curr = new ListNode(l->val);
          curr->next = prev;
          prev = curr;
-         curr = next;
          l = l->next;
       }
 
