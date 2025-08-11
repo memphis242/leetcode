@@ -1,13 +1,13 @@
 #include <cassert>
 
-struct ListNode {
-   int val;
-   ListNode *next;
-
-   ListNode() : val(0), next(nullptr) {}
-   ListNode(int x) : val(x), next(nullptr) {}
-   ListNode(int x, ListNode *next) : val(x), next(next) {}
-};
+//struct ListNode {
+//   int val;
+//   ListNode *next;
+//
+//   ListNode() : val(0), next(nullptr) {}
+//   ListNode(int x) : val(x), next(nullptr) {}
+//   ListNode(int x, ListNode *next) : val(x), next(next) {}
+//};
 
 /**
  * Definition for singly-linked list.
@@ -20,7 +20,7 @@ struct ListNode {
  * };
  */
 
-class Solution {
+class Solution2 {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
         if ( !l1 && !l2 )

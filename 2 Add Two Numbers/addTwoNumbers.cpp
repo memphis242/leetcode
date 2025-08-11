@@ -7,7 +7,7 @@ struct ListNode {
    ListNode(int x, ListNode *next) : val(x), next(next) {}
 };
 
-class Solution {
+class Solution1 {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
         if ( !l1 && !l2 )
