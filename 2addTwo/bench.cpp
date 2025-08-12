@@ -1,21 +1,14 @@
-#include <random>
-
 #include <benchmark/benchmark.h>
 
 #include "addTwo1.cpp"
 #include "addTwo2.cpp"
 
-extern std::vector<struct ListNode*> test_cases;
+extern std::vector<std::pair<ListNode*, ListNode*>> test_cases;
 
 static void BM_addTwo1(benchmark::State& state) {
     Solution1 sol;
-    int idx1 = state.range(0);
-    std::random_device rd; // Obtain a random number from hardware
-    std::mt19937 gen(rd()); // Seed the generator
-    std::uniform_int_distribution<> distr(0, test_cases.size() - 1); // Define the range
-    int idx2 = distr(gen); // idx2 will be a random idx to pair with idx1
-    ListNode* l1 = test_cases[idx1];
-    ListNode* l2 = test_cases[idx2];
+    int idx = state.range(0);
+    auto [l1, l2] = test_cases[idx];
     for (auto _ : state) {
          ListNode* sum = sol.addTwoNumbers(l1, l2);
          benchmark::DoNotOptimize(sum);
@@ -24,13 +17,8 @@ static void BM_addTwo1(benchmark::State& state) {
 
 static void BM_addTwo2(benchmark::State& state) {
     Solution2 sol;
-    int idx1 = state.range(0);
-    std::random_device rd; // Obtain a random number from hardware
-    std::mt19937 gen(rd()); // Seed the generator
-    std::uniform_int_distribution<> distr(0, test_cases.size() - 1); // Define the range
-    int idx2 = distr(gen); // idx2 will be a random idx to pair with idx1
-    ListNode* l1 = test_cases[idx1];
-    ListNode* l2 = test_cases[idx2];
+    int idx = state.range(0);
+    auto [l1, l2] = test_cases[idx];
     for ( auto _ : state ) {
          ListNode* sum = sol.addTwoNumbers(l1, l2);
          benchmark::DoNotOptimize(sum);

@@ -186,7 +186,26 @@ static ListNode l20_2 = { 1, &l20_3 };
 static ListNode l20_1 = { 0, &l20_2 };
 static ListNode l20 = l20_1;
 
-std::vector<struct ListNode*> test_cases = { 
-    &l1, &l2, &l3, &l4, &l5, &l6, &l7, &l8, &l9, &l10, 
-    &l11, &l12, &l13, &l14, &l15, &l16, &l17, &l18, &l19, &l20 
+// Statically initialize 20 pairs of ListNode* for test cases
+std::vector<std::pair<ListNode*, ListNode*>> test_cases = {
+    {&l7,  &l13},
+    {&l1,  &l20},
+    {&l15, &l2},
+    {&l10, &l5},
+    {&l19, &l8},
+    {&l3,  &l18},
+    {&l12, &l4},
+    {&l16, &l9},
+    {&l6,  &l17},
+    {&l11, &l14},
+    {&l8,  &l1},
+    {&l20, &l7},
+    {&l2,  &l19},
+    {&l18, &l12},
+    {&l4,  &l15},
+    {&l13, &l16},
+    {&l14, &l3},
+    {&l5,  &l10},
+    {&l9,  &l6},
+    {&l17, &l11}
 };
