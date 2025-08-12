@@ -5,6 +5,8 @@
 *.a
 *.swp
 
+results.json
+
 # Certain source files I don't want committed
 leetcode.c
 

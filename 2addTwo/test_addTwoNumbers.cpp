@@ -58,4 +58,10 @@ int main() {
 
    // Test case 6: Different lengths
    test_addTwoNumbers({1,8}, {0}, {1,8});
+
+   // Test case 7: 342 + 465 = 807
+   test_addTwoNumbersReverse({3,4,2}, {4,6,5}, {8,0,7});
+
+   // Test case 6: Different lengths
+   test_addTwoNumbers({1,8}, {0}, {1,8});
 }

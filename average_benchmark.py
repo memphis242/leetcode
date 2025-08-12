@@ -96,6 +96,20 @@ def print_results(averages: Dict[str, Dict[str, float]]):
     # Find the longest benchmark name for formatting
     max_name_len = max(len(name) for name in averages.keys()) if averages else 0
     
+    # Find fastest and slowest by real_time
+    if averages:
+        real_times = [(name, stats['real_time']) for name, stats in averages.items()]
+        min_time = min(real_times, key=lambda x: x[1])[1]
+        max_time = max(real_times, key=lambda x: x[1])[1]
+        fastest = {name for name, t in real_times if t == min_time}
+        slowest = {name for name, t in real_times if t == max_time}
+    else:
+        fastest = slowest = set()
+    
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    RESET = '\033[0m'
+    
     print(f"{'Benchmark':<{max_name_len}} {'Count':<6} {'Avg Real Time':<15} {'Avg CPU Time':<15} {'Avg Iterations':<15}")
     print("-" * (max_name_len + 6 + 15 + 15 + 15))
     
@@ -104,8 +118,15 @@ def print_results(averages: Dict[str, Dict[str, float]]):
         cpu_time_str = format_time(stats['cpu_time'])
         iterations_str = f"{stats['iterations']:.0f}"
         count_str = str(stats['count'])
-        
-        print(f"{name:<{max_name_len}} {count_str:<6} {real_time_str:<15} {cpu_time_str:<15} {iterations_str:<15}")
+        color = ''
+        if name in fastest:
+            color = GREEN
+        elif name in slowest:
+            color = RED
+        else:
+            color = ''
+        reset = RESET if color else ''
+        print(f"{color}{name:<{max_name_len}} {count_str:<6} {real_time_str:<15} {cpu_time_str:<15} {iterations_str:<15}{reset}")
 
 
 def main():
