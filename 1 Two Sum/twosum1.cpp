@@ -3,7 +3,7 @@
 
 using namespace std;
 
-class Solution {
+class Solution1 {
 public:
 
     // Observations To Take Advantage Of:
@@ -15,7 +15,7 @@ public:
     // Then, with each successive index, you check if the index is in the
     // list. The list should be a heap so that insertions are logn, and lookups
     // are logn.
-    vector<int> twoSum(vector<int>& nums, int target) {
+    vector<int> twoSum(const vector<int>& nums, int target) {
         if ( nums.size() <= 1 )
             return vector<int>();
 
