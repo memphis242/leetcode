@@ -1,0 +1,11 @@
+
+================================================================================
+BENCHMARK AVERAGES (across all parameterized test cases)
+================================================================================
+Benchmark  Count  Avg Real Time   Avg CPU Time    Avg Iterations 
+-------------------------------------------------------------
+[92mBM_addTwo1 20     101 ns          101 ns          7785641        [0m
+[91mBM_addTwo2 20     166 ns          165 ns          5223547        [0m
+
+Processed 40 benchmark runs
+Found 2 unique benchmark functions
