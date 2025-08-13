@@ -1,0 +1,10 @@
+
+================================================================================
+BENCHMARK AVERAGES (across all parameterized test cases)
+================================================================================
+Benchmark         Count  Avg Real Time   Avg CPU Time    Avg Iterations 
+--------------------------------------------------------------------
+[92mBM_romanNumerals1 20     189 ns          188 ns          6302112        [0m
+
+Processed 20 benchmark runs
+Found 1 unique benchmark functions
