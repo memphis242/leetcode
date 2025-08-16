@@ -1,96 +1,123 @@
 #include <vector>
 #include <cmath>
 #include <limits>
-#include <queue>
+#include <algorithm>
 #include <functional>
 #include <cstdlib>
 
 using namespace std;
 
-template <size_t M>
 struct ValIdx {
     long long val;
     int idx;
 
-    // FIXME: This won't work for >... Because the abs(idx - other.idx) condition
-    //        will cause false positives on >.
-    bool operator<(const ValIdx<M>& other) const {
-        return (val < other.val) && (abs(idx - other.idx) >= M);
+    bool operator<(const ValIdx& other) const {
+        return val < other.val;
+    }
+
+    bool operator>(const ValIdx& other) const {
+        return val > other.val;
     }
 };
 
 // Heap that keeps track of the top k elements
 template <typename Comp, typename T>
-concept CompareFor = requires(Comp comp, const T& a, const T& b) {
-    { comp(a,b) } -> std::convertible_to<bool>;
+concept Comparator = requires(Comp comp, const T& a, const T& b) {
+    { comp(a,b) } -> convertible_to<bool>;
 };
 
-template <typename T, CompareFor<T> Compare = std::greater<T>>
+template <typename T, Comparator<T> Compare = greater<T>>
 class TopKHeap {
 public:
     TopKHeap(size_t cap, Compare comp = Compare{})
         : m_capacity(cap), m_comp(comp) {}
 
-    // TODO: Redo this using <algorithm>'s std::push_heap and make_heap
-    //       operations on a std::vector instead of a priority_queue to
-    //       support faster top swaps.
     void push(const T& val) {
-        if ( m_heap.size() < m_capacity)
-            m_heap.push(val);
-        else if ( m_comp(m_heap.top(), val) ) {
-            (void)m_heap.pop();
-            m_heap.push(val);
+        if ( m_data.size() < m_capacity) {
+            m_data.push_back(val);
+            push_heap(m_data.begin(), m_data.end(), m_comp);
+        }
+        // Does the new value come after the top (min) value in heap ordering?
+        // If so, swap them and heapify.
+        else if ( m_comp(val, m_data.front()) ) {
+            m_data.front() = val;
+            make_heap(m_data.begin(), m_data.end(), m_comp);
         }
     }
 
     T pop(void) {
-        T retVal = m_heap.top();
-        m_heap.pop();
+        T retVal = m_data[0];
+        m_data.erase(m_data.begin());
+        make_heap(m_data.begin(), m_data.end(), m_comp);
         return retVal;
     }
 
+    const T max() const {
+        // TODO: Throw exception if vector is empty
+        if ( m_data.size() == 1 )
+            return m_data[0];
+
+        T maxVal = m_data[1];
+        for ( ptrdiff_t i = 2; i < m_data.size(); ++i ) {
+            maxVal = m_comp( maxVal, m_data[i] ) ? maxVal : m_data[i];
+        }
+        return maxVal;
+    }
+
     const T& top() const {
-        return m_heap.top();
+        return m_data.front();
     }
 
     size_t size() const {
-        return m_heap.size();
+        return m_data.size();
     }
 
     bool empty() const {
-        return m_heap.empty();
+        return m_data.empty();
     }
 
-    std::vector<T>& data() {
-        // TODO: data() method on TopKHeap
+    vector<T>& data() {
+        return m_data;
     }
 
 private:
     size_t m_capacity;
     Compare m_comp;
-    priority_queue<T, std::vector<T>, Compare> m_heap; // min heap
+    vector<T> m_data;
 };
 
 class Solution {
 public:
     long long maximumProduct(vector<int>& nums, int m) {
-        long long max = numeric_limits<long long>::min();
+        long long maxProd = numeric_limits<long long>::min();
 
-        // Track the top 2 positive and top 2 negative numbers.
-        TopKHeap<struct ValIdx<m>, std::less<struct ValIdx<m>>>    pos_heap(2);
-        TopKHeap<struct ValIdx<m>, std::greater<struct ValIdx<m>>> neg_heap(2);
+        // Track the top m positive and top m negative numbers.
+        TopKHeap<struct ValIdx, greater<struct ValIdx>> pos_heap(2);
+        TopKHeap<struct ValIdx, less<struct ValIdx>>    neg_heap(2);
         for ( int i = 0; i < nums.size(); ++i ) {
-            pos_heap.push( (struct ValIdx<m>){ nums[i], i } );
-            neg_heap.push( (struct ValIdx<m>){ nums[i], i } );
+            if ( nums[i] >= 0 && (pos_heap.size() <= 1 || (i - pos_heap.max().idx) >= m) )
+                pos_heap.push( (struct ValIdx){ .val = nums[i], .idx = i } );
+            if ( nums[i] < 0  && (neg_heap.size() <= 1 || (i - neg_heap.max().idx) >= m) )
+                neg_heap.push( (struct ValIdx){ .val = nums[i], .idx = i } );
         }
 
-        // See whether the product of the two max positives or the two max negatives
-        // produce the greater max.
-        std::vector<struct ValIdx<m>> pos_data = pos_heap.data();
-        std::vector<struct ValIdx<m>> neg_data = neg_heap.data();
-        max = pos_data[0] * pos_data[1];
-        max = (neg_data[0] * neg_data[1]) > max ? (neg_data[0] * neg_data[1]) : max;
+        // See which of the two largest pairs produces the larger max
+        vector<long long> pos_data;
+        for ( int i = 0; !pos_heap.empty(); ++i )
+            pos_data.push_back(pos_heap.pop().val);
+        vector<long long> neg_data;
+        for ( int i = 0; !neg_heap.empty(); ++i )
+            neg_data.push_back(neg_heap.pop().val);
 
-        return max;
+        if ( m == 1 )
+            maxProd = max( pos_data[1] * pos_data[1],
+                           neg_data[1] * neg_data[1] );
+        else if ( m == 2 && pos_data.size() == 1 && pos_data.size() == 1 )
+            maxProd = pos_data.front() * neg_data.front();
+        else
+            maxProd = max( pos_data[1] * pos_data[0],
+                           neg_data[1] * neg_data[0] );
+
+        return maxProd;
     }
 };
