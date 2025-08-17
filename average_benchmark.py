@@ -82,7 +82,7 @@ def format_time(nanoseconds: float) -> str:
     elif nanoseconds >= 1e6:
         return f"{nanoseconds / 1e6:.3f} ms"
     elif nanoseconds >= 1e3:
-        return f"{nanoseconds / 1e3:.3f} μs"
+        return f"{nanoseconds / 1e3:.3f} us"
     else:
         return f"{nanoseconds:.0f} ns"
 
@@ -116,7 +116,7 @@ def print_results(averages: Dict[str, Dict[str, float]]):
     for name, stats in sorted(averages.items()):
         real_time_str = format_time(stats['real_time'])
         cpu_time_str = format_time(stats['cpu_time'])
-        iterations_str = f"{stats['iterations']:.0f}"
+        iterations_str = f"{stats['iterations']:,.0f}"
         count_str = str(stats['count'])
         color = ''
         if name in fastest:
@@ -135,12 +135,12 @@ def main():
         print("\nTo generate the JSON file, run your benchmark with:")
         print("  ./bench --benchmark_format=json --benchmark_out=results.json")
         sys.exit(1)
-    
+
     filename = sys.argv[1]
     results = load_benchmark_results(filename)
     averages = calculate_averages(results)
     print_results(averages)
-    
+
     print(f"\nProcessed {len(results.get('benchmarks', []))} benchmark runs")
     print(f"Found {len(averages)} unique benchmark functions")
 
