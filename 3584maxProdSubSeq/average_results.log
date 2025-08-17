@@ -1,0 +1,10 @@
+
+================================================================================
+BENCHMARK AVERAGES (across all parameterized test cases)
+================================================================================
+Benchmark   Count  Avg Real Time   Avg CPU Time    Avg Iterations 
+--------------------------------------------------------------
+[92mBM_maxProd1 20     30.811 us       31.397 us       510,013,719    [0m
+
+Processed 20 benchmark runs
+Found 1 unique benchmark functions
