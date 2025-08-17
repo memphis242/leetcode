@@ -1,13 +1,14 @@
 #include <benchmark/benchmark.h>
 
 #include "maxProdSubSeq.cpp"
+#include "TestData_T.hpp"
 
 using namespace std;
 
-extern vector<pair<vector<int>,int>> testCases;
+extern vector<struct TestData_T> testCases;
 
 static void BM_maxProd1( benchmark::State& state ) {
-    auto [nums, m] = testCases[ state.range(0) ];
+    auto [nums, m, _] = testCases[ state.range(0) ];
     for ( auto _ : state ) {
         Solution1 sol;
         long long result = sol.maximumProduct(nums, m);
