@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         benchmark::RegisterBenchmark("BM_addTwo1", BM_addTwo1)->DenseRange(0, test_cases.size() - 1);
         benchmark::RegisterBenchmark("BM_addTwo2", BM_addTwo2)->DenseRange(0, test_cases.size() - 1);
     }
-    
+
     benchmark::Initialize(&argc, argv);
     benchmark::RunSpecifiedBenchmarks();
     benchmark::Shutdown();
