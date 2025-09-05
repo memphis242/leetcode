@@ -8,24 +8,53 @@
 
 #include <concepts>
 #include <ranges>
-#include <initializer_list>
 #include <optional>
 #include <array>
 #include <functional>
 #include <utility>
 #include <cassert>
 
+// Enforce that the comparator is a predicate that compares two objects of type T.
 template <typename Comp, typename T>
 concept ComparatorFor = std::predicate<Comp, T, T>;
 
+// Enforce that a range passed in to initialize the TopK structure with is
+// 1) a range, and 
+// 2) a range over the type T
 template <typename R, typename T>
-concept RangeOver = std::ranges::range<R>
-                    && std::same_as<std::ranges::range_value_t<R>, T>;
+concept RangeOver = std::ranges::range<R>  // is a range object
+                    && std::same_as<std::ranges::range_value_t<R>, T>;  // is a range over type T
 
 /**
  * @brief A data structure for tracking the top K elements of data pass through.
  *
- * When the measure of "top K elements" is the typical "max K elements", you'll
+ * How this Works:
+ * --------------
+ * A sorted data structure is maintained where the first index has the "bottom"
+ * element and the last index has the "top" element. Once the K elements of this
+ * structure are filled, any new value that comes in is compared with the bottom
+ * element - if the new value is measured "greater" by the comparator of this TopK
+ * object, the new value is swapped in for the bottom index, and then the structure
+ * is re-sorted. This way, the structure effectively maintains the top K elements
+ * that have been passed through it. See the below visual example:
+ *
+ * Top 2 Structure /w std::greater:
+ * -------------------------------
+ * TopK: [5, 9] (pre-populated)
+ * New Value: 3 → Top2 → no change          (5 is > 3, and the array is sorted, so we
+ *                                           can conclude that 3 is also less than every
+ *                                           other element in the TopK structure)
+ *
+ * New Value: 6 → Top2 → [6, 9] → [6, 9]    (6 is > 5, so it is swapped in for 5; the
+ *                                           sequbsequent sort doesn't change anything)
+ *
+ * New Value: 10 → Top2 → [10, 9] → [9, 10] (10 is > 6, so it is swapped in for 6; the
+ *                                           subsequent sort places 10 after the 9)
+ * 
+ * Notice that at each step, the structure has maintained the Top 2 elements
+ * that have been passed through it.
+ *
+ * @note When the measure of "top K elements" is the typical "max K elements", you'll
  * want the comparator to be something that returns true if the first argument
  * is _greater_ than the second argument. If instead you want "min K elements",
  * you'll simply reverse that and provide a "less than" predicate.
@@ -40,6 +69,7 @@ public:
 
     /* ---------------------------- CONSTRUCTORS ---------------------------- */
 
+    // TODO: [[nodiscard]], explicit, and = delete?
     /**
      * @brief Construct with no initial data
      * @param comp The > predicate function
@@ -50,7 +80,8 @@ public:
      * @brief Construct with a range, passing each element of the container
      *        through the data structure and obtaining the top K elements off
      *        the bat.
-     * @param container The container object (e.g., vector, list, ...)
+     * @tparam data The data to initially pass through the TopK structure
+     *              (a RangeOver<T> object, such as a vector, list, ...)
      * @param comp The > predicate function
      */
     TopK( const RangeOver<T> auto& data, Compare comp = Compare{} )
@@ -60,45 +91,45 @@ public:
             pass(v);
     }
 
-    /* ---------------------------- CONSTRUCTORS ---------------------------- */
-
     /**
      * @brief Default destructor only
      */
     ~TopK() = default;
 
+    // TODO: Copy and move constructors
+
     /* ------------------------------ METHODS ------------------------------- */
 
     /**
      * @brief Pass a value through the TopK data structure.
+     * @note The term "pass" is used instead of "push" because I prefer to imagine
+     *       this topK data structure as a small vector "passing over" another,
+     *       as if convolving with it, keeping track of the top K elements.
      */
     void pass(const T& val)
     {
         assert(n_elements >= 0);
-        assert(n_elements <= m_data.size());
-        assert( (n_elements > 0 && m_data[0].has_value()) || n_elements == 0 );
+        assert(n_elements <= capacity());
+        assert( (n_elements > 0 && m_data[0].has_value())
+                || (n_elements == 0 && !m_data[0].has_value()) );
 
         if ( n_elements < K )
         {
-            m_data[n_elements] = val;
-            n_elements++;
+            m_data[n_elements++] = val;
             sort();
         }
         else if ( m_comp(val, *m_data[0]) ) // Note: m_data[0] always contains "bottom" element
         {
-            m_data[0] = val;
+            m_data[0] = val; // Swap-in the new value
             sort();
         }
 
         assert(n_elements >= 0);
-        assert(n_elements <= m_data.size());
+        assert(n_elements <= capacity());
     }
 
     /**
      * @brief Pass a container through the TopK data structure.
-     * @note The term "pass" is used instead of "push" because I prefer to imagine
-     *       this topK data structure as a small vector "passing over" another,
-     *       as if convolving with it.
      */
     void pass(const RangeOver<T> auto& data)
     {
@@ -108,11 +139,16 @@ public:
 
     /**
      * @brief Remove and return the top element
+     * @note std::optional instead of std::expected because I don't think making
+     *       and error type is necessary here. The lack of an object is self
+     *       explanatory and I wouldn't say is an error.
      */
     std::optional<T> pop(void)
     {
         assert(n_elements >= 0);
-        assert(n_elements <= m_data.size());
+        assert(n_elements <= capacity());
+        assert( (n_elements > 0 && m_data[n_elements - 1].has_value())
+                || (n_elements == 0 && !m_data[0].has_value()) );
 
         if ( n_elements == 0 )
             return std::nullopt;
@@ -122,7 +158,9 @@ public:
         n_elements--;
 
         assert(n_elements >= 0);
-        assert(n_elements <= m_data.size());
+        assert(n_elements <= capacity());
+        assert( (n_elements > 0 && m_data[n_elements - 1].has_value())
+                || (n_elements == 0 && !m_data[0].has_value()) );
 
         return top_val;
     }
@@ -150,11 +188,16 @@ public:
      */
     std::optional<T> top() const
     {
+        assert(n_elements >= 0);
+        assert(n_elements <= capacity());
+        assert( (n_elements > 0 && m_data[n_elements - 1].has_value())
+                || (n_elements == 0 && !m_data[0].has_value()) );
+
         if ( n_elements == 0 )
             return std::nullopt;
 
         assert(n_elements > 0);
-        assert(n_elements <= m_data.size());
+        assert(n_elements <= capacity());
 
         return m_data[n_elements - 1];
     }
@@ -165,7 +208,7 @@ public:
     std::size_t size() const
     {
         assert(n_elements >= 0);
-        assert(n_elements <= m_data.size());
+        assert(n_elements <= capacity());
 
         return n_elements;
     }
@@ -181,13 +224,13 @@ public:
     /**
      * @brief Return whether or not the data structure is empty
      */
-    bool empty() const
+    bool is_empty() const noexcept
     {
         return n_elements == 0;
     }
 
 private:
-    Compare m_comp;
+    const Compare m_comp;
     std::array<std::optional<T>, K> m_data;
     std::size_t n_elements = 0;
 
@@ -197,7 +240,7 @@ private:
     void sort(void) // Sort m_data
     {
         assert(n_elements >= 0);
-        assert(n_elements <= m_data.size());
+        assert(n_elements <= capacity());
 #       ifndef NDEBUG
         for ( size_t i = 0; i < n_elements; ++i )
         {
@@ -206,19 +249,10 @@ private:
 #       endif
 
         // std::sort will likely do insertion sort on smaller container sizes and
-        // merge/heap sort on larger container sizes. We don't that flexibility here
-        // with a "TopK" data structure that in practice where K will at most be in
-        // the 10s. So, I'll simply do the best sorting algorithm right here.
+        // merge/heap sort on larger container sizes. We don't need that flexibility
+        // here with a "TopK" data structure that in practice will at most have 10s
+        // of elements. So, I'll simply do the best sorting algorithm right here.
 
-#       ifdef USE_BUBBLE_SORT
-
-#       elif defined(USE_MERGE_SORT)
-
-#       elif defined(USE_SELECTION_SORT)
-
-#       elif defined(USE_NETWORK_SORT)
-
-#       else
         // Insertion Sort
         for ( ptrdiff_t i = 1, j = 1; i < n_elements; ++i, j = i )
         {
@@ -228,6 +262,5 @@ private:
                 --j;
             }
         }
-    #endif
     }
 };
