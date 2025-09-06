@@ -254,7 +254,7 @@ private:
         // of elements. So, I'll simply do the best sorting algorithm right here.
 
         // Insertion Sort
-        for ( ptrdiff_t i = 1, j = 1; i < n_elements; ++i, j = i )
+        for ( ptrdiff_t i = 1, j = 1; i < (ptrdiff_t)n_elements; ++i, j = i )
         {
             while ( j > 0 && m_comp(*m_data[j-1], *m_data[j]) )
             {

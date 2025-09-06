@@ -1,0 +1,10 @@
+
+================================================================================
+BENCHMARK AVERAGES (across all parameterized test cases)
+================================================================================
+Benchmark           Count  Avg Real Time   Avg CPU Time    Avg Iterations 
+----------------------------------------------------------------------
+[92mTopK Insertion Sort 20     23.023 us       22.973 us       11,697,045     [0m
+
+Processed 20 benchmark runs
+Found 1 unique benchmark functions
