@@ -33,3 +33,11 @@ TEST(Test_Top2, SmallRange_RepeatingNum)
    EXPECT_EQ(*topVals[0], 5);
    EXPECT_EQ(*topVals[1], 5);
 }
+
+TEST(Test_Top2, RangeSizeLessThanK)
+{
+   TopK<int, 2> topk( std::vector<int>({5}) );
+   auto topVals = topk.topK();
+   EXPECT_EQ(*topVals[0], 5);
+   EXPECT_FALSE(topVals[1].has_value());
+}
