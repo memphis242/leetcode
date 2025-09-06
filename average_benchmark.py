@@ -34,8 +34,8 @@ def extract_base_name(benchmark_name: str) -> str:
     return benchmark_name
 
 
-def calculate_averages(results: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
-    """Calculate averages for parameterized benchmark runs."""
+def calculate_stats(results: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+    """Calculate averages and min/max for parameterized benchmark runs."""
     # Group benchmarks by base name
     grouped_benchmarks = defaultdict(list)
     
@@ -43,36 +43,46 @@ def calculate_averages(results: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
         base_name = extract_base_name(benchmark['name'])
         grouped_benchmarks[base_name].append(benchmark)
     
-    # Calculate averages for each group
-    averages = {}
+    # Calculate averages and min/max for each group
+    stats = {}
     
     for base_name, benchmarks in grouped_benchmarks.items():
         if len(benchmarks) <= 1:
             # No parameterization, just use the single result
             if benchmarks:
                 b = benchmarks[0]
-                averages[base_name] = {
-                    'real_time': b.get('real_time', 0),
-                    'cpu_time': b.get('cpu_time', 0),
+                real_time = b.get('real_time', 0)
+                cpu_time = b.get('cpu_time', 0)
+                stats[base_name] = {
+                    'real_time': real_time,
+                    'cpu_time': cpu_time,
+                    'min_real_time': real_time,
+                    'max_real_time': real_time,
+                    'min_cpu_time': cpu_time,
+                    'max_cpu_time': cpu_time,
                     'iterations': b.get('iterations', 0),
                     'count': 1
                 }
             continue
         
-        # Calculate averages across all parameterized runs
-        total_real_time = sum(b.get('real_time', 0) for b in benchmarks)
-        total_cpu_time = sum(b.get('cpu_time', 0) for b in benchmarks)
+        # Calculate averages and min/max across all parameterized runs
+        real_times = [b.get('real_time', 0) for b in benchmarks]
+        cpu_times = [b.get('cpu_time', 0) for b in benchmarks]
         total_iterations = sum(b.get('iterations', 0) for b in benchmarks)
         count = len(benchmarks)
         
-        averages[base_name] = {
-            'real_time': total_real_time / count,
-            'cpu_time': total_cpu_time / count,
+        stats[base_name] = {
+            'real_time': sum(real_times) / count,
+            'cpu_time': sum(cpu_times) / count,
+            'min_real_time': min(real_times),
+            'max_real_time': max(real_times),
+            'min_cpu_time': min(cpu_times),
+            'max_cpu_time': max(cpu_times),
             'iterations': total_iterations / count,
             'count': count
         }
     
-    return averages
+    return stats
 
 
 def format_time(nanoseconds: float) -> str:
@@ -83,22 +93,26 @@ def format_time(nanoseconds: float) -> str:
         return f"{nanoseconds / 1e6:.3f} ms"
     elif nanoseconds >= 1e3:
         return f"{nanoseconds / 1e3:.3f} us"
+    elif nanoseconds < 1.0:
+        return f"{nanoseconds:.3f} ns"
     else:
         return f"{nanoseconds:.0f} ns"
 
 
-def print_results(averages: Dict[str, Dict[str, float]]):
+def print_results(stats: Dict[str, Dict[str, float]]):
     """Print formatted average results."""
-    print("\n" + "="*80)
-    print("BENCHMARK AVERAGES (across all parameterized test cases)")
-    print("="*80)
-    
+ 
     # Find the longest benchmark name for formatting
-    max_name_len = max(len(name) for name in averages.keys()) if averages else 0
+    max_name_len = max(len(name) for name in stats.keys()) if stats else 0
+
+    print("\n")
+    print("-" * (max_name_len + 10 + 6 + 15*6 + 12 + 7))
+    print("AGGREGATED BENCHMARK RESULTS (across all parameterized test cases)")
+    print("-" * (max_name_len + 10 + 6 + 15*6 + 12 + 7))
     
     # Find fastest and slowest by real_time
-    if averages:
-        real_times = [(name, stats['real_time']) for name, stats in averages.items()]
+    if stats:
+        real_times = [(name, s['real_time']) for name, s in stats.items()]
         min_time = min(real_times, key=lambda x: x[1])[1]
         max_time = max(real_times, key=lambda x: x[1])[1]
         fastest = {name for name, t in real_times if t == min_time}
@@ -110,23 +124,23 @@ def print_results(averages: Dict[str, Dict[str, float]]):
     RED = '\033[91m'
     RESET = '\033[0m'
     
-    print(f"{'Benchmark':<{max_name_len}} {'Count':<6} {'Avg Real Time':<15} {'Avg CPU Time':<15} {'Avg Iterations':<15}")
-    print("-" * (max_name_len + 6 + 15 + 15 + 15))
+    # Header line
+    print(f"{'Benchmark':<{max_name_len + 10}} {'Count':<6} {'Avg Real':<15} {'Min Real':<15} {'Max Real':<15} " +
+          f"{'Avg CPU':<15} {'Min CPU':<15} {'Max CPU':<15} {'Iterations':<12}")
+    print("-" * (max_name_len + 10 + 6 + 15*6 + 12 + 7))
     
-    for name, stats in sorted(averages.items()):
-        real_time_str = format_time(stats['real_time'])
-        cpu_time_str = format_time(stats['cpu_time'])
-        iterations_str = f"{stats['iterations']:,.0f}"
-        count_str = str(stats['count'])
-        color = ''
-        if name in fastest:
-            color = GREEN
-        elif name in slowest:
-            color = RED
-        else:
-            color = ''
+    for name, stat in sorted(stats.items()):
+        color = GREEN if name in fastest else RED if name in slowest else ''
         reset = RESET if color else ''
-        print(f"{color}{name:<{max_name_len}} {count_str:<6} {real_time_str:<15} {cpu_time_str:<15} {iterations_str:<15}{reset}")
+        
+        print(f"{color}{name:<{max_name_len + 10}} {stat['count']:<6} " +
+              f"{format_time(stat['real_time']):<15} " +
+              f"{format_time(stat['min_real_time']):<15} " +
+              f"{format_time(stat['max_real_time']):<15} " +
+              f"{format_time(stat['cpu_time']):<15} " +
+              f"{format_time(stat['min_cpu_time']):<15} " +
+              f"{format_time(stat['max_cpu_time']):<15} " +
+              f"{stat['iterations']:,.0f}{reset}")
 
 
 def main():
@@ -138,11 +152,11 @@ def main():
 
     filename = sys.argv[1]
     results = load_benchmark_results(filename)
-    averages = calculate_averages(results)
-    print_results(averages)
+    stats = calculate_stats(results)
+    print_results(stats)
 
     print(f"\nProcessed {len(results.get('benchmarks', []))} benchmark runs")
-    print(f"Found {len(averages)} unique benchmark functions")
+    print(f"Found {len(stats)} unique benchmark functions")
 
 
 if __name__ == "__main__":
