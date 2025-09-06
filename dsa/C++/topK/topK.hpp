@@ -241,12 +241,12 @@ private:
     {
         assert(n_elements >= 0);
         assert(n_elements <= capacity());
-#       ifndef NDEBUG
+#ifndef NDEBUG
         for ( size_t i = 0; i < n_elements; ++i )
         {
             assert(m_data[i].has_value());
         }
-#       endif
+#endif
 
         // std::sort will likely do insertion sort on smaller container sizes and
         // merge/heap sort on larger container sizes. We don't need that flexibility
@@ -254,13 +254,16 @@ private:
         // of elements. So, I'll simply do the best sorting algorithm right here.
 
         // Insertion Sort
-        for ( ptrdiff_t i = 1, j = 1; i < (ptrdiff_t)n_elements; ++i, j = i )
+        for ( std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(n_elements); ++i )
         {
-            while ( j > 0 && m_comp(*m_data[j-1], *m_data[j]) )
+            auto key = m_data[i];
+            j = i - 1;
+            while ( j >= 0 && m_comp(*m_data[j], key) )
             {
-                std::swap( m_data[j-1], m_data[j] );
+                m_data[j+1] = m_data[j];
                 --j;
             }
+            m_data[j+1] = key;
         }
     }
 };
