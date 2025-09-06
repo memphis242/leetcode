@@ -11,7 +11,7 @@ namespace sorts
 
    template<typename R>
    concept GTComparableRange = std::ranges::random_access_range<R>
-                             && GTComparable<std::ranges::range_value_t<R>>;
+                               && GTComparable<std::ranges::range_value_t<R>>;
 
    template<GTComparableRange R>
    void insertion(R& range)
