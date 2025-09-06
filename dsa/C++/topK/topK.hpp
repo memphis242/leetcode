@@ -257,7 +257,7 @@ private:
         for ( std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(n_elements); ++i )
         {
             auto key = m_data[i];
-            j = i - 1;
+            std::ptrdiff_t j = i - 1;
             while ( j >= 0 && m_comp(*m_data[j], key) )
             {
                 m_data[j+1] = m_data[j];
