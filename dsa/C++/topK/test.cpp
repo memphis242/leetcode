@@ -41,3 +41,36 @@ TEST(Test_Top2, RangeSizeLessThanK)
    EXPECT_EQ(*topVals[0], 5);
    EXPECT_FALSE(topVals[1].has_value());
 }
+
+TEST(Test_Top2Pass, FewUniqueValues)
+{
+   TopK<int, 2> topk;
+   topk.pass(5);
+   topk.pass(6);
+   topk.pass(7);
+   topk.pass(8);
+   auto topVals = topk.topK();
+   EXPECT_EQ(*topVals[0], 7);
+   EXPECT_EQ(*topVals[1], 8);
+}
+
+TEST(Test_Top2Pass, RepeatingValues)
+{
+   TopK<int, 2> topk;
+   topk.pass(5);
+   topk.pass(5);
+   topk.pass(5);
+   topk.pass(5);
+   auto topVals = topk.topK();
+   EXPECT_EQ(*topVals[0], 5);
+   EXPECT_EQ(*topVals[1], 5);
+}
+
+TEST(Test_Top2Pass, SingleVal)
+{
+   TopK<int, 2> topk;
+   topk.pass(5);
+   auto topVals = topk.topK();
+   EXPECT_EQ(*topVals[0], 5);
+   EXPECT_FALSE(topVals[1].has_value());
+}
